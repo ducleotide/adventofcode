@@ -1,7 +1,7 @@
 import logging
 import pandas as pd
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s")
 
 
 def load_input(filename):
@@ -41,14 +41,14 @@ def similarity(df):
     left_arr = df['left'].unique().tolist()
     r_ct = df['right'].value_counts().sort_index()
     ret_arr = []
-    logging.info(f"r_ct {r_ct}")
-    logging.info(f"left_arr {left_arr}")
+    logging.debug(f"r_ct {r_ct}")
+    logging.debug(f"left_arr {left_arr}")
     for l in left_arr:
         if l in r_ct.index:
             x = int(r_ct.loc[l])
         else:
             x = 0
-        logging.info(f"{l} and rload {x}")
+        logging.debug(f"{l} and rload {x}")
         ret_arr.append(x * l)
     ret = sum(ret_arr) if len(ret_arr) > 0 else 0
     return ret
@@ -66,12 +66,12 @@ def main():
 
     left_arr = list(df['left'])
     right_arr = list(df['right'])
-    logging.info(f"left: {left_arr}, right: {right_arr}")
+    logging.debug(f"left: {left_arr}, right: {right_arr}")
     part_one = diff_arr(left_arr, right_arr)
-    logging.info(part_one)
+    logging.info(f"part_one {part_one}")
 
     part_two = similarity(df)
-    logging.info(part_two)
+    logging.info(f"part two: {part_two}")
 
 
 if __name__ == '__main__':
