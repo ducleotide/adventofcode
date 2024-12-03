@@ -1,7 +1,6 @@
+import aoc_common
 import logging
 import pandas as pd
-
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s")
 
 
 def load_input(filename):
@@ -56,11 +55,7 @@ def similarity(df):
 
 def main():
 
-    import argparse
-    parser = argparse.ArgumentParser(description='Advent of Code 2024 Day 1')
-    parser.add_argument('inputfile', type=str, )
-
-    args = parser.parse_args()
+    args = aoc_common.aoc_parse_args()
 
     df = load_input(args.inputfile)
 
