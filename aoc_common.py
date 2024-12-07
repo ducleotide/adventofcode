@@ -3,7 +3,7 @@ import logging
 
 def aoc_parse_args():
     import argparse
-    parser = argparse.ArgumentParser(description='Advent of Code 2024 Day 1')
+    parser = argparse.ArgumentParser(description='Advent of Code 2024')
     parser.add_argument('inputfile', type=str, )
     parser.add_argument('--debug', '-d', action='store_true', help='Debug mode')
     args = parser.parse_args()
