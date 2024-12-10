@@ -123,8 +123,10 @@ def check_x_mas(input_table: list[str], x_x:int, x_y:int) -> int:
         print(f"{x_x, x_y} 02 MAS UP")
         ret += 1
 
-    # x_x + 2 < len(input_table[x_y]) and\
+    #
     if x_x > 2 and x_y > 2 and \
+            x_x + 2 >= len(input_table[x_y]) and \
+            x_y + 2 >= len(input_table) and \
             input_table[x_y][x_x] == 'M' and input_table[x_y][x_x - 2] == 'M' and \
             input_table[x_y - 1][x_x - 1] == 'A' and \
             input_table[x_y - 2][x_x] == 'S' and input_table[x_y - 2][x_x - 2] == 'S':
