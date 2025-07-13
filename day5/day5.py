@@ -1,4 +1,3 @@
-
 def load_input(filename):
     fin = open(filename, 'r')
     page_ordering_rules = []
@@ -16,16 +15,49 @@ def load_input(filename):
     return page_ordering_rules, page_number_updates
 
 
+class Page:
+    number: int
+    is_before: list[int]
+
+    def __init__(self, first, second):
+        self.number = first
+        self.is_before = [second]
+
+    def update_page(self, second):
+        self.is_before.append(second)
+
+
 class OrderingRules:
-    def __init__(self, page_ordering_rules: list(int)):
-        self.ordering_rules = []
-        for ordering_rule in page_ordering_rules:
-            self.ordering_rules.append(page_ordering_rules)
+    ordering_rules: dict(int, Page) = {}
+
+    def __init__(self, page_ordering_rules: list[(int,int)]):
+        for first, second in page_ordering_rules:
+            if first not in self.ordering_rules:
+                self.ordering_rules[first] = Page(first, second)
+            else:
+                self.ordering_rules[first].update_page(second)
+
+            # condense update ordering rules
+
+    def is_valid(self, update):
+        for page in update:
+            pass
 
 
-def build_ordering_rules(page_ordering_rules):
-    ordering_rules: OrderingRules = OrderingRules(page_ordering_rules)
+def main():
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('filename')
+    args = parser.parse_args()
+
+    page_ordering_rules, page_number_updates = load_input(args.filename)
+
+    ordering_rules = OrderingRules(page_ordering_rules, page_number_updates)
+
+    for update in page_number_updates:
+        print(f"pagen number update: [{update}]")
+        ordering_rules.is_valid(update)
 
 
-
-    return ordering_rules
+if __name__ == '__main__':
+    main()

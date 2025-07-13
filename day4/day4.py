@@ -1,10 +1,10 @@
 
 def load_input(filename) -> list[str]:
     with open(filename) as f:
-        input:list[list[str]] = []
+        input_arr:list[str] = []
         for line in f:
-            input.append(line.strip())
-        return input
+            input_arr.append(line.strip())
+        return input_arr
 
 
 def check_xmas(input: list[str], x_x:int, x_y:int) -> int:
