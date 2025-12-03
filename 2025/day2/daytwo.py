@@ -40,6 +40,30 @@ def find_invalid_ids(id_range: IdRange):
     return invalid_ids
 
 
+def find_invalid_ids_substr(id_range: IdRange):
+    invalid_ids: list[int] = []
+    for id in range(id_range.start_id, id_range.end_id+1):
+        str_id = str(id)
+        half = int(len(str_id)/2)
+        print(f"check valid {id}, half {half}")
+
+        for i in range(1, half+1):
+            seq = str_id[:i]
+            print(f"seq {seq}; [i+1: {i+1}]; [len(str_id)+1: {len(str_id)+1}]; [len(seq): {len(seq)}]")
+            #compare seq along the way
+            num_seq = 0
+            num_copied_seq = 0
+            print(f"range(i+1, len(str_id), len(seq)): --{list(range(i+1, len(str_id)+1, len(seq)))}--")
+            for j in range(i+1, len(str_id)+1, len(seq)):
+                next_seq = str_id[j: j+(len(seq))]
+                print(f"[i:{i}]; [j:{j}]; [len(seq):{len(seq)}], len(seq) + j + 1: {len(seq) + j + 1}; seq[0, {i}]{seq} [next_seq=={next_seq}==]")
+                if seq == next_seq:
+                    num_copied_seq += 1
+                    print(f"found copy {seq}=={next_seq}")
+                num_seq += 1
+
+
+
 def main():
     args = aoc_common.aoc_parse_args()
 
