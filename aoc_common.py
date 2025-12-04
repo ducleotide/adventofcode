@@ -14,3 +14,11 @@ def aoc_parse_args():
     logging.basicConfig(level=log_level,
                         format="%(asctime)s %(levelname)s: %(message)s")
     return args
+
+
+def load_input_table(filename) -> list[str]:
+    with open(filename) as f:
+        input_arr:list[str] = []
+        for line in f:
+            input_arr.append(line.strip())
+        return input_arr
