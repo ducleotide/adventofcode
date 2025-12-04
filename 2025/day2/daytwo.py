@@ -2,6 +2,8 @@ import logging
 from pydantic import BaseModel
 import aoc_common
 
+logger = logging.getLogger(name=__name__)
+# logger.setLevel(level=logging.DEBUG)
 
 class IdRange(BaseModel):
     start_id: int
@@ -23,45 +25,59 @@ def load_idranges(inputfile):
         return idranges
 
 
-def find_invalid_ids(id_range: IdRange):
+def compare_with_rest(orig_str: str, substr: str, rest_of_str: str, sublen: int):
+    len_rest_of_str = len(rest_of_str)
+    if sublen >= int(len(orig_str)/2+1):
+        return True
+    for i in range(0, len_rest_of_str, sublen):
+        if substr != rest_of_str[i: i+sublen]:
+            return compare_with_rest(orig_str, orig_str[:sublen+1], orig_str[sublen+1:], sublen+1)
+    return False
+
+
+def id_valid(id: int, idlen:int = 1) -> bool:
+    str_id = str(id)
+    logger.debug(f"str: {str_id}")
+
+    substr = str_id[:idlen]
+    rest_of_str = str_id[idlen:]
+    logger.debug(f"substr")
+    return compare_with_rest(str_id, substr, rest_of_str, idlen)
+
+    #
+    # if len(str_id) % mult_factor != 0:
+    #     logger.debug(f"{id} is valid (modulo != 0)")
+    #     return True
+    # subs_len = int(len(str_id) / mult_factor)
+    # substr = str_id[0:subs_len]
+    # logger.debug(f"sub_len {subs_len}; substr {substr} ")
+    # logger.debug(f"range: {list(range(subs_len, len(str_id), subs_len))}")
+    # for i in range(subs_len, len(str_id), subs_len):
+    #     logger.debug(f"{i}: str_id[i:i+subs_len] {str_id[i:i+subs_len]}")
+    #     if substr != str_id[i:i+subs_len]:
+    #         return True
+    # return False
+    # return str_id[0:subs_len] != str_id[subs_len:]
+
+
+def find_invalid_ids(id_range: IdRange, use_mult_factor:bool = False):
     invalid_ids: list[int] = []
 
     for id in range(id_range.start_id, id_range.end_id+1):
-        logging.debug(f"check valid {id}")
-        str_id = str(id)
-        if len(str_id) % 2 == 1:
-            logging.debug(f"{id} is valid (odd length)")
-            continue
-        half_size = int(len(str_id)/2)
-        if str_id[0:half_size] == str_id[half_size:]:
-            logging.info(f"{id} is invalid")
-            invalid_ids.append(id)
-    logging.info(f"num invalid ids in {id_range} is {len(invalid_ids)}")
+        # logging.debug(f"check valid {id}")
+        if use_mult_factor:
+            max_mult_factor = int(len(str(id))/2) + 1
+            logging.info(f"from 2 to {max_mult_factor} {list(range(1, max_mult_factor))}")
+            for mult_factor in range(1, max_mult_factor):
+                if not id_valid(id, mult_factor=mult_factor):
+                    invalid_ids.append(id)
+                    continue
+        else:
+            if not id_valid(id, int(len(str(id))/2)):
+                # logging.debug(f"{id} is invalid")
+                invalid_ids.append(id)
+    logger.info(f"num invalid ids in {id_range} is {len(invalid_ids)}")
     return invalid_ids
-
-
-def find_invalid_ids_substr(id_range: IdRange):
-    invalid_ids: list[int] = []
-    for id in range(id_range.start_id, id_range.end_id+1):
-        str_id = str(id)
-        half = int(len(str_id)/2)
-        print(f"check valid {id}, half {half}")
-
-        for i in range(1, half+1):
-            seq = str_id[:i]
-            print(f"seq {seq}; [i+1: {i+1}]; [len(str_id)+1: {len(str_id)+1}]; [len(seq): {len(seq)}]")
-            #compare seq along the way
-            num_seq = 0
-            num_copied_seq = 0
-            print(f"range(i+1, len(str_id), len(seq)): --{list(range(i+1, len(str_id)+1, len(seq)))}--")
-            for j in range(i+1, len(str_id)+1, len(seq)):
-                next_seq = str_id[j: j+(len(seq))]
-                print(f"[i:{i}]; [j:{j}]; [len(seq):{len(seq)}], len(seq) + j + 1: {len(seq) + j + 1}; seq[0, {i}]{seq} [next_seq=={next_seq}==]")
-                if seq == next_seq:
-                    num_copied_seq += 1
-                    print(f"found copy {seq}=={next_seq}")
-                num_seq += 1
-
 
 
 def main():
@@ -71,10 +87,22 @@ def main():
     tot_invalid_ids: list[int] = []
     for id_range in id_ranges:
         invalid_ids = find_invalid_ids(id_range)
-        logging.info(f"invalid_ids: {invalid_ids}")
+        logger.info(f"invalid_ids: {invalid_ids}")
         tot_invalid_ids.extend(invalid_ids)
-    logging.info(f"tot invalid_ids: {len(tot_invalid_ids)}")
-    logging.info(f"sum tot_invalid: {sum(tot_invalid_ids)}")
+    logger.info(f"tot invalid_ids: {len(tot_invalid_ids)}")
+    logger.info(f"PART 1: sum tot_invalid: {sum(tot_invalid_ids)}")
+    logger.info("-----------------")
+    logger.info("-----------------")
+    logger.info("-----------------")
+    # sum_invalid_ids = 0
+    # tot_invalid_ids: list[int] = []
+    # for id_range in id_ranges:
+    #     invalid_ids = find_invalid_ids(id_range, use_mult_factor=True)
+    #     logger.info(f"invalid_ids: {invalid_ids}")
+    #     tot_invalid_ids.extend(invalid_ids)
+    #     sum_invalid_ids += sum(invalid_ids)
+    # logger.info(f"totinvalid ids: {len(tot_invalid_ids)}")
+    # logger.info(f"PART2: sum_tot_invalid: {sum_invalid_ids}")
 
 if __name__ == "__main__":
     main()
