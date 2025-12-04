@@ -14,8 +14,7 @@ class BatteryBank(BaseModel):
     bank_list: str
     joltages: list[Battery] = []
     max_joltage: int = -1
-    max_battery: tuple[Battery, Battery] = (Battery(bank_index=-1, joltage=-1),
-                                            Battery(bank_index=-1, joltage=-1))
+    max_battery: list[Battery] = []
 
     def __init__(self, /, **data):
         super().__init__(**data)
@@ -29,49 +28,43 @@ class BatteryBank(BaseModel):
             logging.error("bank_list is no initialized")
 
 
-def determine_max_battery_joltage(battery_bank: BatteryBank):
-    """Iterate through the battery bank joltages and determine the top 2 joltages"""
-    first_max = battery_bank.max_battery[0]
-    for i in range(len(battery_bank.joltages)-1):
-        battery: Battery = battery_bank.joltages[i]
-        if battery.joltage > first_max.joltage:
-            first_max = battery
-            logging.debug(f"found higher joltage: [{first_max}]")
-    logging.debug(f"first max [{first_max}]")
-    second_max = battery_bank.max_battery[1]
-    logging.debug(f"starting second max")
-    starting_point = first_max.bank_index
-    for j in range(starting_point, len(battery_bank.joltages)):
-        battery = battery_bank.joltages[j]
-        if battery.joltage > second_max.joltage and battery.bank_index != first_max.bank_index:
-            second_max = battery
-            logging.debug(f"found higher joltage: [{second_max}]")
-    logging.debug(f"second max [{second_max}")
+def determine_max_battery_joltage(battery_bank: BatteryBank, battery_length=2):
+    """Iterate through the battery bank joltages and determine the top "battery_length" joltages"""
+    next_bank_starting_point = 0
+    for battery_index in range(battery_length):
+        next_max = Battery(bank_index=0, joltage=-1)
+        bank_range_end = len(battery_bank.joltages) - (battery_length - (battery_index + 1))
+        logging.debug(f"starting next max index = {battery_index}. len {len(battery_bank.joltages)}. bank_range: {next_bank_starting_point} {bank_range_end}")
+        for j in range(next_bank_starting_point, bank_range_end):
+            battery = battery_bank.joltages[j]
+            if battery.joltage > next_max.joltage:
+                next_max = battery
+                logging.debug(f"found higher joltage: [{next_max}]")
+        logging.debug(f"next max [{next_max}")
+        battery_bank.max_battery.append(next_max)
+        next_bank_starting_point = next_max.bank_index + 1
 
-    if first_max.bank_index < second_max.bank_index:
-        battery_bank.max_battery[0].joltage = first_max.joltage
-        battery_bank.max_battery[0].bank_index = first_max.bank_index
-        battery_bank.max_battery[1].joltage = second_max.joltage
-        battery_bank.max_battery[1].bank_index = second_max.bank_index
-    else:
-        battery_bank.max_battery[0].joltage = second_max.joltage
-        battery_bank.max_battery[0].bank_index = second_max.bank_index
-        battery_bank.max_battery[1].joltage = first_max.joltage
-        battery_bank.max_battery[1].bank_index = first_max.bank_index
+    # calculate joltage value
+    battery_bank.max_joltage = 0
+    exp = 0
+    for max_battery_val in reversed(battery_bank.max_battery):
+        joltage_val = max_battery_val.joltage * (10**exp)
+        logging.debug(f"max_battery_val {max_battery_val.joltage}, exp {exp}, {max_battery_val.joltage} * (10**{exp}) {joltage_val}")
+        exp += 1
+        battery_bank.max_joltage += joltage_val
 
-    battery_bank.max_joltage = battery_bank.max_battery[0].joltage * 10 + battery_bank.max_battery[1].joltage
     logging.info(f"batterybank max_joltage {battery_bank.max_joltage}")
 
 
-def load_battery_banks(input_file: str) -> list[BatteryBank]:
+def load_battery_banks(input_file: str, ) -> list[BatteryBank]:
     """Loads battery banks from the input file."""
     with open(input_file, 'r') as f:
         battery_banks: list[BatteryBank] = []
         for line in f:
             battery_bank = BatteryBank(bank_list=line.strip())
-            logging.info(f"battery_bank: {battery_bank.bank_list}")
+            logging.debug(f"battery_bank: {battery_bank.bank_list}")
 
-            determine_max_battery_joltage(battery_bank)
+            # determine_max_battery_joltage(battery_bank)
             battery_banks.append(battery_bank)
 
         return battery_banks
@@ -83,10 +76,16 @@ def main():
 
     joltage_sum = 0
     for battery_bank in battery_banks:
+        determine_max_battery_joltage(battery_bank)
         joltage_sum += battery_bank.max_joltage
-    logging.info(f"joltage_sum = {joltage_sum}")
-
-
+    logging.info(f"Part1 joltage_sum = {joltage_sum}")
+    logging.info(f"------------------")
+    battery_banks = load_battery_banks(args.inputfile)
+    joltage_sum = 0
+    for battery_bank in battery_banks:
+        determine_max_battery_joltage(battery_bank, battery_length=12)
+        joltage_sum += battery_bank.max_joltage
+    logging.info(f"Part2 joltage_sum = {joltage_sum}")
 
 
 if __name__ == "__main__":
