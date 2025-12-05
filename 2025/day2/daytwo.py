@@ -66,16 +66,12 @@ def find_invalid_ids(id_range: IdRange, use_mult_factor:bool = False):
     for id in range(id_range.start_id, id_range.end_id+1):
         # logging.debug(f"check valid {id}")
         if use_mult_factor:
-            max_mult_factor = int(len(str(id))/2) + 1
-            logging.info(f"from 2 to {max_mult_factor} {list(range(1, max_mult_factor))}")
-            for mult_factor in range(1, max_mult_factor):
-                if not id_valid(id, mult_factor=mult_factor):
-                    invalid_ids.append(id)
-                    continue
+            idlen = 1
         else:
-            if not id_valid(id, int(len(str(id))/2)):
-                # logging.debug(f"{id} is invalid")
-                invalid_ids.append(id)
+            idlen = int(len(str(id))/2)
+        if not id_valid(id, idlen=idlen):
+            # logging.debug(f"{id} is invalid")
+            invalid_ids.append(id)
     logger.info(f"num invalid ids in {id_range} is {len(invalid_ids)}")
     return invalid_ids
 
