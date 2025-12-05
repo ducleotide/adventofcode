@@ -21,15 +21,15 @@ def load_input_file(filename: str) -> Tuple[list[IngredientRange], list[int]]:
             ingredient_ranges.append(IngredientRange(start_id=int(first_id), end_id=int(second_id)))
 
         for line in f:
-            id = int(line.strip())
-            ingredient_ids.append(id)
+            fresh_id = int(line.strip())
+            ingredient_ids.append(fresh_id)
 
         return ingredient_ranges, ingredient_ids
 
 
-def is_fresh(id: int, ingredient_ranges: list[IngredientRange]) -> bool:
+def is_fresh(fresh_id: int, ingredient_ranges: list[IngredientRange]) -> bool:
     for ingredient_range in ingredient_ranges:
-        if ingredient_range.start_id <= id <= ingredient_range.end_id:
+        if ingredient_range.start_id <= fresh_id <= ingredient_range.end_id:
             return True
     return False
 
@@ -75,9 +75,9 @@ def main():
     ingredient_ranges, ingredient_ids = load_input_file(args.inputfile)
 
     fresh_list: list[int] = []
-    for id in ingredient_ids:
-        if is_fresh(id, ingredient_ranges):
-            fresh_list.append(id)
+    for fresh_id in ingredient_ids:
+        if is_fresh(fresh_id, ingredient_ranges):
+            fresh_list.append(fresh_id)
 
     print(f"part 1: num fresh {len(fresh_list)}")
 
