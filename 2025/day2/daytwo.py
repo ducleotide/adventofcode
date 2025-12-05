@@ -10,68 +10,56 @@ class IdRange(BaseModel):
     end_id: int
 
 
-def load_idranges(inputfile):
-    with open(inputfile, 'r') as f:
-        idranges: list[IdRange] = []
+def load_id_ranges(input_file):
+    with open(input_file, 'r') as f:
+        id_ranges: list[IdRange] = []
         lines = f.readlines()
         for x in lines:
-            str_idranges = x.split(',')
-            for str_idrange in str_idranges:
-                start_id, end_id = str_idrange.split('-')
+            str_id_ranges = x.split(',')
+            for str_id_range in str_id_ranges:
+                start_id, end_id = str_id_range.split('-')
                 id_range = IdRange(start_id=int(start_id), end_id=int(end_id))
                 logging.debug(f"id_range {id_range}")
-                idranges.append(id_range)
+                id_ranges.append(id_range)
 
-        return idranges
+        return id_ranges
 
 
-def compare_with_rest(orig_str: str, substr: str, rest_of_str: str, sublen: int):
+def compare_with_rest(orig_str: str, substr: str, rest_of_str: str, sub_len: int):
     len_rest_of_str = len(rest_of_str)
-    if sublen >= int(len(orig_str)/2+1):
+    if sub_len >= int(len(orig_str) / 2 + 1):
         return True
-    for i in range(0, len_rest_of_str, sublen):
-        if substr != rest_of_str[i: i+sublen]:
-            return compare_with_rest(orig_str, orig_str[:sublen+1], orig_str[sublen+1:], sublen+1)
+    for i in range(0, len_rest_of_str, sub_len):
+        if substr != rest_of_str[i: i + sub_len]:
+            return compare_with_rest(orig_str, orig_str[:sub_len + 1], orig_str[sub_len + 1:], sub_len + 1)
     return False
 
 
-def id_valid(id: int, idlen:int = 1) -> bool:
-    str_id = str(id)
+def id_valid(prod_id: int, id_len:int = 1) -> bool:
+    str_id = str(prod_id)
     logger.debug(f"str: {str_id}")
 
-    substr = str_id[:idlen]
-    rest_of_str = str_id[idlen:]
+    substr = str_id[:id_len]
+    rest_of_str = str_id[id_len:]
     logger.debug(f"substr")
-    return compare_with_rest(str_id, substr, rest_of_str, idlen)
-
-    #
-    # if len(str_id) % mult_factor != 0:
-    #     logger.debug(f"{id} is valid (modulo != 0)")
-    #     return True
-    # subs_len = int(len(str_id) / mult_factor)
-    # substr = str_id[0:subs_len]
-    # logger.debug(f"sub_len {subs_len}; substr {substr} ")
-    # logger.debug(f"range: {list(range(subs_len, len(str_id), subs_len))}")
-    # for i in range(subs_len, len(str_id), subs_len):
-    #     logger.debug(f"{i}: str_id[i:i+subs_len] {str_id[i:i+subs_len]}")
-    #     if substr != str_id[i:i+subs_len]:
-    #         return True
-    # return False
-    # return str_id[0:subs_len] != str_id[subs_len:]
+    return compare_with_rest(str_id, substr, rest_of_str, id_len)
 
 
 def find_invalid_ids(id_range: IdRange, use_mult_factor:bool = False):
     invalid_ids: list[int] = []
 
-    for id in range(id_range.start_id, id_range.end_id+1):
-        # logging.debug(f"check valid {id}")
+    for prod_id in range(id_range.start_id, id_range.end_id+1):
         if use_mult_factor:
-            idlen = 1
+            id_len = 1
         else:
-            idlen = int(len(str(id))/2)
-        if not id_valid(id, idlen=idlen):
+            id_len = int(len(str(prod_id))/2)
+            if len(str(prod_id)) % 2 == 1:
+                logging.debug(f"{prod_id} is of odd length. it is Valid")
+                continue
+        logging.debug(f"check valid {prod_id}, id_len {id_len}")
+        if not id_valid(prod_id, id_len=id_len):
             # logging.debug(f"{id} is invalid")
-            invalid_ids.append(id)
+            invalid_ids.append(prod_id)
     logger.info(f"num invalid ids in {id_range} is {len(invalid_ids)}")
     return invalid_ids
 
@@ -79,7 +67,7 @@ def find_invalid_ids(id_range: IdRange, use_mult_factor:bool = False):
 def main():
     args = aoc_common.aoc_parse_args()
 
-    id_ranges = load_idranges(args.inputfile)
+    id_ranges = load_id_ranges(args.inputfile)
     tot_invalid_ids: list[int] = []
     for id_range in id_ranges:
         invalid_ids = find_invalid_ids(id_range)
@@ -90,15 +78,15 @@ def main():
     logger.info("-----------------")
     logger.info("-----------------")
     logger.info("-----------------")
-    # sum_invalid_ids = 0
-    # tot_invalid_ids: list[int] = []
-    # for id_range in id_ranges:
-    #     invalid_ids = find_invalid_ids(id_range, use_mult_factor=True)
-    #     logger.info(f"invalid_ids: {invalid_ids}")
-    #     tot_invalid_ids.extend(invalid_ids)
-    #     sum_invalid_ids += sum(invalid_ids)
-    # logger.info(f"totinvalid ids: {len(tot_invalid_ids)}")
-    # logger.info(f"PART2: sum_tot_invalid: {sum_invalid_ids}")
+    sum_invalid_ids = 0
+    tot_invalid_ids: list[int] = []
+    for id_range in id_ranges:
+        invalid_ids = find_invalid_ids(id_range, use_mult_factor=True)
+        logger.info(f"invalid_ids: {invalid_ids}")
+        tot_invalid_ids.extend(invalid_ids)
+        sum_invalid_ids += sum(invalid_ids)
+    logger.info(f"tot invalid ids: {len(tot_invalid_ids)}")
+    logger.info(f"PART2: sum_tot_invalid: {sum_invalid_ids}")
 
 if __name__ == "__main__":
     main()
